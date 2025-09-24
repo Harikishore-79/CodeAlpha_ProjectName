@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Music Player</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #121212;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .player {
+      background: #1e1e1e;
+      padding: 20px;
+      border-radius: 15px;
+      width: 300px;
+      text-align: center;
+      box-shadow: 0px 4px 10px rgba(0,0,0,0.5);
+    }
+    .player h2, .player h3 {
+      margin: 5px 0;
+      color:red;
+    }
+    .controls button {
+      margin: 10px;
+      padding: 10px;
+      border: none;
+      border-radius: 50%;
+      background: #333;
+      color: #fff;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .controls button:hover {
+      background: #555;
+    }
+    #progress {
+      width: 100%;
+      margin: 10px 0;
+    }
+    #volume {
+      width: 100%;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="player">
+    <h2 id="title">Song Title</h2>
+    <h3 id="artist">Artist</h3>
+    <audio id="audio"></audio>
+    <input type="range" id="progress" value="0">
+    <div class="controls">
+      <button id="prev">⏮</button>
+      <button id="play">▶</button>
+      <button id="next">⏭</button>
+    </div>
+    <input type="range" id="volume" min="0" max="1" step="0.1" value="0.5">
+    <p id="duration">00:00 / 00:00</p>
+  </div>
+
+  <script>
+    const songs = [
+      { title: "OG-The Gangster", artist:"SS Thaman", src: "Washi-o-Washi" },
+      { title: "Salaar-The Ceasefire", artist: "Ravi Basrur", src: "Wrap of Salaar" },
+      { title: "Devara-Part-1", artist: "Anirudh", src: "Devara Thandavam" }
+    ];
+
+    let songIndex = 0;
+    const audio = document.getElementById("audio");
+    const title = document.getElementById("title");
+    const artist = document.getElementById("artist");
+    const playBtn = document.getElementById("play");
+    const prevBtn = document.getElementById("prev");
+    const nextBtn = document.getElementById("next");
+    const progress = document.getElementById("progress");
+    const volume = document.getElementById("volume");
+    const durationEl = document.getElementById("duration");
+
+    function loadSong(song) {
+      title.textContent = song.title;
+      artist.textContent = song.artist;
+      audio.src = song.src;
+    }
+
+    function playSong() {
+      audio.play();
+      playBtn.textContent = "⏸";
+    }
+
+    function pauseSong() {
+      audio.pause();
+      playBtn.textContent = "▶";
+    }
+
+    playBtn.addEventListener("click", () => {
+      if (audio.paused) {
+        playSong();
+      } else {
+        pauseSong();
+      }
+    });
+
+    prevBtn.addEventListener("click", () => {
+      songIndex = (songIndex - 1 + songs.length) % songs.length;
+      loadSong(songs[songIndex]);
+      playSong();
+    });
+
+    nextBtn.addEventListener("click", () => {
+      songIndex = (songIndex + 1) % songs.length;
+      loadSong(songs[songIndex]);
+      playSong();
+    });
+
+    audio.addEventListener("timeupdate", () => {
+      progress.value = (audio.currentTime / audio.duration) * 100;
+      updateDuration();
+    });
+
+    progress.addEventListener("input", () => {
+      audio.currentTime = (progress.value / 100) * audio.duration;
+    });
+
+    volume.addEventListener("input", () => {
+      audio.volume = volume.value;
+    });
+
+    audio.addEventListener("ended", () => {
+      nextBtn.click(); // autoplay next song
+    });
+
+    function updateDuration() {
+      let current = formatTime(audio.currentTime);
+      let total = formatTime(audio.duration);
+      durationEl.textContent =`${current}/ $ {total}`;
+    }
+
+    function formatTime(seconds) {
+      if (isNaN(seconds)) return "00:00";
+      let m = Math.floor(seconds / 60);
+      let s = Math.floor(seconds % 60);
+      return`${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+
+    // Load the first song
+    loadSong(songs[songIndex]);
+  </script>
+</body>
+</html>
